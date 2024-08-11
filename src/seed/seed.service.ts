@@ -14,10 +14,10 @@ export class SeedService {
   async executeSeed() {
     await this.pokemonModel.deleteMany({});
 
-    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20');
+    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=300');
     const data: PokeDataResponse = await res.json();
 
-    const insertPromisesArray = [];
+    const pokemonToInsert: { name: string; pokeNumber: number }[] = [];
 
     data.results.forEach(({ name, url }) => {
       const segments = url.split('/');
@@ -25,10 +25,10 @@ export class SeedService {
       const pokeNumber = +segments[segments.length - 2];
 
       //  await this.pokemonModel.create({ pokeNumber, name });
-      insertPromisesArray.push(this.pokemonModel.create({ pokeNumber, name }));
+      pokemonToInsert.push({ name, pokeNumber });
     });
 
-    await Promise.all(insertPromisesArray);
+    await this.pokemonModel.insertMany(pokemonToInsert);
 
     return `seed executed successfully`;
   }
